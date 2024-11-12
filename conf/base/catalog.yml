@@ -1,0 +1,7 @@
+data:
+  type: pandas.ParquetDataset
+  filepath: data/01_raw/data.pq
+
+base:
+  type: pandas.ExcelDataset
+  filepath: data/01_raw/base.xlsx
