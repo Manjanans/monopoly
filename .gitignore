@@ -17,8 +17,8 @@ data/**
 # also keep all .gitkeep files
 !.gitkeep
 
-# Don't upload datasets example dataset
-data/01_raw/*
+# ignore session_store
+session_store.db
 
 
 ##########################
