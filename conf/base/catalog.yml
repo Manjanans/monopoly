@@ -2,6 +2,18 @@ data:
   type: pandas.ParquetDataset
   filepath: data/01_raw/data.pq
 
-base:
-  type: pandas.ExcelDataset
-  filepath: data/01_raw/base.xlsx
+client_data:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/client_data.pq
+
+client_transactions:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/client_transactions.pq
+
+merged_data:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/merged_data.pq
+
+data_groups:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/data_groups.pq
