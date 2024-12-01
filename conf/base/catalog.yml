@@ -17,3 +17,7 @@ merged_data:
 data_groups:
   type: pandas.ParquetDataset
   filepath: data/03_primary/data_groups.pq
+
+other_data:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/other_data.pq

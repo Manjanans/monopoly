@@ -258,3 +258,50 @@ def data_groups(merged_data: pd.DataFrame) -> pd.DataFrame:
         groups['Total_'+prefix[:11]] = merged_data[columns_to_sum].sum(axis=1)
 
     return groups
+
+def more_groups(data:pd.DataFrame, merged_data:pd.DataFrame) -> pd.DataFrame:
+    all_cols = []
+    other_data = pd.DataFrame(data[['Id','Consumo','Hipotecario','Edad','Sexo']])
+    other_data = other_data.rename(columns={
+        'Id':'ID',
+        'Consumo':'Consumer',
+        'Hipotecario':'Mortgage',
+        'Edad':'Age',
+        'Sexo':'Sex'
+    })
+    for month in range(1,13):
+        X = month
+        if X<10:
+            uso1 = f'Nac_Bought_CC_0{X}'
+            uso2 = f'Nac_Advanc_CC_0{X}'
+            uso3 = f'Int_Bought_CC_0{X}'
+            col1 = f'UsoL1_T0{X}'
+            col2 = f'UsoL2_T0{X}'
+            col3 = f'UsoLI_T0{X}'
+        else:
+            uso1 = f'Nac_Bought_CC_{X}'
+            uso2 = f'Nac_Advanc_CC_{X}'
+            uso3 = f'Int_Bought_CC_{X}'
+            col1 = f'UsoL1_T{X}'
+            col2 = f'UsoL2_T{X}'
+            col3 = f'UsoLI_T{X}'
+        monthly_transactions = data[['Id',col1, col2, col3]].rename(columns={
+            'Id':'ID',
+            col1: uso1,
+            col2: uso2,
+            col3: uso3,
+        })
+        all_cols.append(monthly_transactions)
+
+    #First, it creates a dataset, with the first item on the list (first month).
+    client_transactions = all_cols[0]
+    #For loop to merge the rest of the months
+    for data_month in all_cols[1:]:
+        client_transactions = pd.merge(client_transactions,data_month, on='ID',how='outer')
+        
+    prefixes = ['Nac_Bought_CC_', 'Nac_Advanc_CC_', 'Int_Bought_CC_']
+    for prefix in prefixes:
+        columns_to_sum = [f'{prefix}{i:02}' for i in range(1, 13)]
+        other_data['Total_'+prefix[:12]] = client_transactions[columns_to_sum].sum(axis=1)
+    
+    return other_data
