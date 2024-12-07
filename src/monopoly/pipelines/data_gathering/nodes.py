@@ -305,3 +305,4 @@ def more_groups(data:pd.DataFrame, merged_data:pd.DataFrame) -> pd.DataFrame:
         other_data['Total_'+prefix[:12]] = client_transactions[columns_to_sum].sum(axis=1)
     
     return other_data
+
