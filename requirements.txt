@@ -12,3 +12,4 @@ gdown
 imbalanced-learn
 xgboost
 lightgbm
+flask

@@ -21,3 +21,7 @@ data_groups:
 other_data:
   type: pandas.ParquetDataset
   filepath: data/03_primary/other_data.pq
+
+clean_data:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/clean_data.pq

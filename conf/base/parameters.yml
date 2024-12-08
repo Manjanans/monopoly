@@ -1,0 +1,6 @@
+quantile_international_save_path: "data/06_models/quantile_international.pkl"
+quantile_num_acc_save_path: "data/06_models/quantile_num_acc.pkl"
+save_path_international_model: "data/07_model_output/international_model.pkl"
+save_path_num_acc_model: "data/07_model_output/num_acc_model.pkl"
+quantile_predict_international: "data/07_model_output/quantile_predict_international.pkl"
+quantile_predict_num_acc: "data/07_model_output/quantile_predict_num_acc.pkl"
