@@ -27,6 +27,6 @@ def create_pipeline() -> Pipeline:
                 inputs=["data", "merged_data"],
                 outputs="other_data",
                 name="more_groups_node",
-            )
+            ),
         ]
     )
