@@ -3,10 +3,11 @@ import numpy as np
 import pickle
 from sklearn.impute import KNNImputer
 from sklearn.preprocessing import QuantileTransformer
+from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import train_test_split
 from xgboost import XGBRegressor
-from sklearn.ensemble import ExtraTreesRegressor
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score,classification_report,accuracy_score
 
 
 def multicolumn_IQR_dropna(dataframe:pd.DataFrame) -> pd.DataFrame:
@@ -72,6 +73,7 @@ def clean_data(client_data:pd.DataFrame, save_path_international, save_path_acc,
     df_iqr = multicolumn_IQR(df)
     knn_imputer = KNNImputer(n_neighbors=10, weights='uniform')
     imputed = pd.DataFrame(knn_imputer.fit_transform(df_iqr), columns=df_iqr.columns)
+    imputed['Num_Acc'] = imputed['Num_Acc'].replace({1: 0, 2: 1, 3: 1})
     quantile = QuantileTransformer(output_distribution='normal')
     quantile.fit(imputed)
     df_quantile = pd.DataFrame(quantile.transform(imputed), columns=imputed.columns)
@@ -163,45 +165,43 @@ def international_model(clean_data:pd.DataFrame, save_path_international_model) 
     with open(save_path_international_model, 'wb') as f:
         pickle.dump(model, f)
 
-def num_acc_model(clean_data:pd.DataFrame, save_path_num_acc_model) -> pd.DataFrame:
+def num_acc_model(clean_data:pd.DataFrame, save_path_num_acc_model):
+    # Split the data into features (X) and target (y)
     X = clean_data[['Num_CC', 'National', 'International']]
-    y = clean_data['Num_Acc']
-
-    # División del conjunto de datos (60% entrenamiento, 20% validación, 20% prueba)
-    X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.4, random_state=42)
-    X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
+    y = clean_data[['Num_Acc']].astype('int')
     
+    
+    # Split data into train (70%) and temp (30%) sets
+    X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3, random_state=42)
+    
+    # Further split temp into validation (50% of temp) and test (50% of temp)
+    X_valid, X_test, y_valid, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
+    
+    # Balance the training data using SMOTE
+    smote = SMOTE(random_state=42)
+    X_train_balanced, y_train_balanced = smote.fit_resample(X_train, y_train)
+    
+    # Initialize and train the Random Forest Classifier
+    rf = RandomForestClassifier(random_state=42)
+    rf.fit(X_train_balanced, y_train_balanced)
+    
+    # Evaluate on validation data
+    y_valid_pred = rf.predict(X_valid)
+    valid_accuracy = accuracy_score(y_valid, y_valid_pred)
+    print("\nValidation Classification Report:")
+    print(classification_report(y_valid, y_valid_pred))
+    
+    # Evaluate on test data
+    y_test_pred = rf.predict(X_test)
+    test_accuracy = accuracy_score(y_test, y_test_pred)
+    print("\nTest Classification Report:")
+    print(classification_report(y_test, y_test_pred))
+    
+    # Results summary
+    results = {
+        'Validation Accuracy': valid_accuracy,
+        'Test Accuracy': test_accuracy
+    }
 
-    # Mejor modelo con los mejores hiperparámetros encontrados
-    model = ExtraTreesRegressor(
-            n_estimators=15,
-            max_features=1.0,
-            min_samples_leaf=2,
-            min_samples_split=21,
-            random_state=42
-        )
-
-    # Entrenar el modelo en el conjunto de entrenamiento
-    model.fit(X_train, y_train)
-
-    # Evaluar en los conjuntos de validación y prueba
-    y_val_pred = model.predict(X_val)
-    y_test_pred = model.predict(X_test)
-
-    val_r2 = r2_score(y_val, y_val_pred)
-    val_mse = mean_squared_error(y_val, y_val_pred)
-
-    test_r2 = r2_score(y_test, y_test_pred)
-    test_mse = mean_squared_error(y_test, y_test_pred)
-
-    # Resultados
-    print("Resultados en Validación:")
-    print(f"R²: {val_r2}")
-    print(f"MSE: {val_mse}")
-
-    print("\nResultados en Prueba:")
-    print(f"R²: {test_r2}")
-    print(f"MSE: {test_mse}")
     with open(save_path_num_acc_model, 'wb') as f:
-        pickle.dump(model, f)
-
+        pickle.dump(rf, f)
