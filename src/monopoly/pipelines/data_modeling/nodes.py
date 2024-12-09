@@ -84,6 +84,7 @@ def clean_data(client_data:pd.DataFrame, save_path_international, save_path_acc,
     predict_international = tik.fit(imputed[['Num_Acc','National']])
     predict_num_acc = tok.fit(imputed[['Num_CC', 'National', 'International']])
     final = multicolumn_IQR_dropna(df_quantile)
+    
     with open(save_path_international, 'wb') as f:
         pickle.dump(international, f)
     with open(save_path_acc, 'wb') as f:
