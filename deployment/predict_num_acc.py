@@ -31,8 +31,10 @@ def predict():
     pred = model.predict(features)
     pred = quantile.inverse_transform(pred.reshape(-1, 1))
 
+    texto = 'Tiene 1 cuenta' if pred[0] == 0 else 'Tiene 2 o máscuentas'
+
     # Return prediction to the HTML page
-    return render_template("predict_num_acc.html", prediction=int(pred[0]))
+    return render_template("predict_num_acc.html", prediction=texto)
 
 if __name__ == "__main__":
     app.run(debug=True)

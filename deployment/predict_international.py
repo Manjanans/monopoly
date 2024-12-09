@@ -30,8 +30,9 @@ def predict():
     prediction = model.predict(features)
     prediction = quantile.inverse_transform(prediction.reshape(-1, 1))
 
+    
     # Return prediction to the HTML page
-    return render_template("index.html", prediction=int(prediction[0]))
+    return render_template("index.html", prediction=prediction[0])
 
 if __name__ == "__main__":
     app.run(debug=True)
